@@ -1,0 +1,11 @@
+# post-procesing rules
+
+[postproc p2]
+targets = p2
+pattern = NP < (VBN|VBD|VBG=n1 < /.ncreas.*/) !$.. PP
+script = delete n1
+
+
+
+
+
