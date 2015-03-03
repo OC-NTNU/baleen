@@ -12,8 +12,8 @@ class Matches(pd.DataFrame):
     fields = ["pat_name", "label", "file", "rel_tree_n", "node_n", "subtree", "substr"]
     
     @classmethod
-    def from_patterns(cls, patterns, nodes, file_path, 
-                      tree_info=None, exec_path="tregex.sh"):
+    def from_patterns(cls, patterns, nodes, file_path, tree_info=None,
+                      exec_path="tregex.sh", drop_duplicates=False):
         """
         Collect the subtrees/substrings matching the given patterns
         
@@ -30,6 +30,9 @@ class Matches(pd.DataFrame):
             see Matches.get_tree_info
         exec_path: str, optional
             path to tregex.sh executable
+        drop_duplicates: bool, opt
+            remove duplicate matches (i.e. with identical values for
+            label, file, tree number and node number)
             
         Returns
         -------
@@ -55,7 +58,14 @@ class Matches(pd.DataFrame):
                                 nodes.get_subtree(node_id), 
                                 nodes.get_substring(node_id)))
             
-        return pd.DataFrame(records, columns=cls.fields)
+        matches = pd.DataFrame(records, columns=cls.fields)
+        
+        if drop_duplicates:
+            matches.drop_duplicates(
+                subset=['label', 'file', 'rel_tree_n', 'node_n'], 
+                inplace=True)
+        
+        return matches
         
     @classmethod   
     def get_tree_info(cls, file_path):
