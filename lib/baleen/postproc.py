@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
-from tredev.nodes import Nodes
 from baleen.tsurgeon import edit_trees
+from baleen.utils import tree_yield
 
 
 def post_process(matches, rules_fname):
@@ -40,11 +40,3 @@ def read_postproc_rules(rules_fname):
         
 def subtrees_to_substrings(subtrees):
     return [tree_yield(subtree) for subtree in subtrees]
-    
-        
-def tree_yield(tree):
-    # quick & dirty tree yield
-    terms = [Nodes.unescape_brackets(part.rstrip(")")) 
-             for part in tree.split() 
-             if not part.startswith("(")]
-    return " ".join(terms)
