@@ -24,8 +24,9 @@ def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
     ----------
     org_matches: pandas.DataFrame or str
         original matches or name of file with pickled original matches
-    transform_fname: str
-        name of file with definitions of tree transformations
+    transform_fname: str or list
+        name of file with definitions of tree transformations or
+        list of filenames
     trans_matches_fname: str
         name of file for outputting transformed matches
     org_tuples_fname: str
@@ -58,7 +59,16 @@ def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
     # ------------------------------------------------------------------------
     # STEP 2: Transform matches by spawning Jython script
     # ------------------------------------------------------------------------
-    trans_tuples_file = tempfile.NamedTemporaryFile()     
+    trans_tuples_file = tempfile.NamedTemporaryFile()   
+    
+    if not isinstance(transform_fname, str):
+        transform_file = tempfile.NamedTemporaryFile("wb")
+        for fname in transform_fname:
+            transform_file.write(open(fname, "rb").read())
+        transform_fname = transform_file.name
+        transform_file.flush()
+        
+        
         
     # get file path to current module (i.e. baleen.trans.wrap)
     path = sys.modules[__name__].__file__
