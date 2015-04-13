@@ -14,8 +14,8 @@ from baleen.utils import tree_yield
 
 
 
-def transform_matches(org_matches, transform_fname,
-                      trans_matches_fname=None, jython_exec="jython", 
+def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
+                      org_tuples_fname=None, jython_exec="jython", 
                       jython_path=None):
     """
     Transform matches by applying tree transformations
@@ -28,10 +28,14 @@ def transform_matches(org_matches, transform_fname,
         name of file with definitions of tree transformations
     trans_matches_fname: str
         name of file for outputting transformed matches
+    org_tuples_fname: str
+        name of file for outputting original matches. This is normally a
+        temp file, but in order to run the transform.py Jython script from 
+        the command line, an named file is required. 
     jython_exec: str
         path to Jython executable
     jython_path: str
-        value assigned to JYTHONPATH environment variable 
+        value assigned to JYTHONPATH environment variable
         
     Returns
     -------
@@ -44,7 +48,11 @@ def transform_matches(org_matches, transform_fname,
     # ------------------------------------------------------------------------
     if isinstance(org_matches, str): 
         org_matches = pd.read_pickle(org_matches)
-    org_tuples_file = tempfile.NamedTemporaryFile()
+
+    if org_tuples_fname:
+        org_tuples_file = open(org_tuples_fname, "wb")
+    else:
+        org_tuples_file = tempfile.NamedTemporaryFile()
     export_to_tuples(org_matches, org_tuples_file.name)
     
     # ------------------------------------------------------------------------

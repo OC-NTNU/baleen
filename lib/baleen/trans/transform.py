@@ -95,7 +95,7 @@ def read_transformations(fname):
 
     # create an ordered dict with name as key and [pattern, operation] as
     # value
-    return OrderedDict( (parts[i].lstrip(" #"), parts[i+1: i+3])
+    return OrderedDict( (parts[i].strip(" \t$"), parts[i+1: i+3])
                         for i in range(0, len(parts), 3) )
 
 
@@ -114,10 +114,14 @@ def apply_transform(name, sc_pattern, sc_operation, tuples, max_index):
         # using Tree.valueOf. Among other things, this flattens the tree.
         # E.g. (NP (NP x)) becomes (NP x). In order to compare trimmed trees
         # to Tsurgeon output, the latter trees must be normalized as well.
+        
+        # Instantiation of Tree class fails for ill-formed trees, e.g. if the
+        # root node was deleted by the transformation. In that case,
+        # trans_tree is None
         trans_tree = Tree.valueOf(trans_tree.toString())
         ancestor_tree = tuples[ancestor_index].subtree
-
-        if trans_tree != ancestor_tree:
+        
+        if trans_tree and trans_tree != ancestor_tree:
             max_index += 1
             tuples[max_index] = Tuple(ancestor_index, name, trans_tree)
             
