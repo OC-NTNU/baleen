@@ -9,12 +9,14 @@ def post_process(matches, rules_fname):
     
     for target, rules in target_to_rules.items():
         selection = matches["pat_name"] == target
-        subtrees = matches["subtree"][selection]
+
+        if any(selection):
+            subtrees = matches["subtree"][selection]
         
-        for rule in rules:
-            subtrees = edit_trees(subtrees, rule["pattern"], rule["script"])
-            matches["subtree"][selection] = subtrees
-            matches["substr"][selection] = subtrees_to_substrings(subtrees)
+            for rule in rules:
+                subtrees = edit_trees(subtrees, rule["pattern"], rule["script"])
+                matches["subtree"][selection] = subtrees
+                matches["substr"][selection] = subtrees_to_substrings(subtrees)
         
 
 def read_postproc_rules(rules_fname):
