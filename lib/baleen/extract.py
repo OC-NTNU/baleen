@@ -1,5 +1,5 @@
 from glob import glob
-from os.path import basename
+from os.path import join, basename
 
 import pandas as pd
 
@@ -77,7 +77,9 @@ class Matches(pd.DataFrame):
         # absolute tree number, counting from 1
         abs_tree_n = 0
         
-        for fname in glob(file_path + "/*"):
+        # sort files, because order of files listed may differ 
+        # depending on OS
+        for fname in sorted(glob(join(file_path,  "*"))):
             base_fname = basename(fname)
             # relative tree number, restarting at 1 for every new file
             rel_tree_n = 0
