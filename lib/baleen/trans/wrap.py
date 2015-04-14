@@ -16,7 +16,7 @@ from baleen.utils import tree_yield
 
 def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
                       org_tuples_fname=None, jython_exec="jython", 
-                      jython_path=None):
+                      jython_path=None, class_path=None):
     """
     Transform matches by applying tree transformations
     
@@ -36,7 +36,11 @@ def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
     jython_exec: str
         path to Jython executable
     jython_path: str
-        value assigned to JYTHONPATH environment variable
+        value assigned to JYTHONPATH environment variable:
+        use with Jython 2.7 on Mac OS
+    class_path: str
+        value assigned to JYTHONPATH/CLASSPATH environment variable:
+        use with Jython 2.5 on Linux
         
     Returns
     -------
@@ -79,11 +83,19 @@ def transform_matches(org_matches, transform_fname, trans_matches_fname=None,
     args = [jython_exec, script_fname, 
             org_tuples_file.name, transform_fname, trans_tuples_file.name]
     
-    # if given, set JYTHONPATH env var, otherwise assume it is set
+    # If given, set JYTHONPATH env var, otherwise assume it is set:
+    # use with Jython 2.7 on Mac OS
     if jython_path:
-        os.environ["JYTHONPATH"] = jython_path    
-        
+        os.environ["JYTHONPATH"] = jython_path
+    # If given, set CLASSPATH env var, otherwise assume it is set:
+    # use with Jython 2.5 on Linux
+    elif class_path:
+        os.environ["CLASSPATH"] = class_path
+    # Note: for some weird reason, setting *both* results in 
+    # weird import errors on Linux...
+ 
     subprocess.check_output(args)
+
     
     # ------------------------------------------------------------------------
     # STEP 3: Import transformed matches from tuples       

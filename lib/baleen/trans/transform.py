@@ -12,8 +12,14 @@ Requires:
 import re
 import sys
 import pickle
-from collections import OrderedDict, namedtuple
-import logging
+from collections import namedtuple
+
+try:
+    # Jython 2.7
+    from collections import OrderedDict, namedtuple
+except ImportError:
+    # Jython 2.5
+    from ordereddict import OrderedDict
 
 
 hint = """
@@ -26,6 +32,9 @@ or in your code extend the system path like
 
   import sys
   sys.path.append("/path/to/stanford-tregex.jar")
+
+Some versions of Jython seems to require setting of CLASSPATH 
+instead of JYTHONPATH. 
 """
 
 try:
@@ -33,7 +42,8 @@ try:
     from edu.stanford.nlp.trees.tregex import TregexPattern
     from edu.stanford.nlp.trees.tregex.tsurgeon import Tsurgeon
     from edu.stanford.nlp.ling import Sentence
-except ImportError as error:
+#except ImportError as error:
+except ImportError, error:
     print error
     sys.exit(hint)
 
