@@ -200,35 +200,45 @@ def merge_matches(org_matches, trans_matches):
     # almost all of the indices of original mathes, except for those that
     # were dropped during pruning because of ill-formed trees.
     merged_matches = trans_matches.join(org_matches)
-    # Add a new columns for tracking descendants
+    # Add a new columns for tracking descendants and origin
     merged_matches["descendants"] = None
+    merged_matches["origin"] = None
     
-    # Get indices of transformed matches
+    # Get indices of only transformed matches
     indices = merged_matches.index[merged_matches["file"].isnull()]
     # Columns to copy from ancestor to descendant
     columns = ["pat_name", "label", "file", "rel_tree_n", "node_n"]
     
     # Now iterate over all transformed matches 
     for i in indices:        
-        # Get ancenstor index
+        # Get ancenstor index (Why does this return a float!?)
         j = int(merged_matches.at[i, 'ancestor'])
         
         # Copy info from ancestor to descendant        
         merged_matches.loc[i, columns] = merged_matches.loc[j, columns]
-        
-        # Derive substring from subtree
-        merged_matches.at[i, "substr"] = tree_yield(
-            merged_matches.at[i, "subtree"])
         
         # Add current index to list of descendants of ancestor
         try:
             merged_matches.loc[j, "descendants"].append(i)
         except AttributeError:
             merged_matches.loc[j, "descendants"] = [i]
+        
+        # FIXME: this is rather inefficient
+        # follow chain of ancestors until origin is reached
+        # i.e. a match with no ancestor
+        while not pd.isnull(merged_matches.at[j, "ancestor"]):
+            j = int(merged_matches.at[j, "ancestor"])
+        
+        merged_matches.at[i, "origin"] = j 
+        
+        # Derive substring from subtree
+        merged_matches.at[i, "substr"] = tree_yield(
+            merged_matches.at[i, "subtree"])
             
     # rearrange columns
     columns = ['pat_name', 'label', 'file', 'rel_tree_n', 'node_n',
-               'subtree', 'substr', 'trans_name', 'ancestor', 'descendants']
+               'subtree', 'substr', 'trans_name', 
+               'origin', 'ancestor', 'descendants']
     return merged_matches[columns]
         
 
